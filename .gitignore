@@ -1,0 +1,81 @@
+# ========== ЗАВИСИМОСТИ ==========
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ========== СБОРКА И ЛОГИ ==========
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ========== ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ ==========
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ========== СИСТЕМНЫЕ ФАЙЛЫ ==========
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+*.bak
+
+# ========== РЕДАКТОРЫ КОДА ==========
+.vscode/
+.idea/
+*.sublime-*
+.project
+.classpath
+.settings/
+
+# ========== БЭКЕНД ==========
+backend/node_modules/
+backend/package-lock.json
+backend/.env
+
+# ========== ФРОНТЕНД ==========
+frontend/node_modules/
+frontend/package-lock.json
+frontend/.env
+frontend/build/
+frontend/coverage/
+
+# ========== ТЕСТЫ ==========
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+
+# ========== БАЗЫ ДАННЫХ ==========
+*.db
+*.sqlite
+*.sqlite3
+
+# ========== ВРЕМЕННЫЕ ФАЙЛЫ ==========
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ========== АРХИВЫ ==========
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# ========== ОСОБЫЕ СЛУЧАИ ==========
+# Раскомментируйте, если нужно игнорировать JSON с данными
+# backend/products.json
+# backend/users.json
+
+# Раскомментируйте, если нужно игнорировать папку с картинками
+# frontend/public/images/
