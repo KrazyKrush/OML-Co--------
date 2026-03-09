@@ -109,16 +109,6 @@ const products = [
     stock: 47,
     rating: 4.7,
     image: 'https://via.placeholder.com/300x200?text=OML+Книга'
-  },
-  {
-    id: '12',
-    name: 'Зелье удачи "OML Фартовый"',
-    category: 'Зелья OML',
-    description: 'После приёма вы обязательно найдёте деньги... но потеряете носки. Действует 24 часа. Хит продаж OML&CO.',
-    price: 399,
-    stock: 84,
-    rating: 4.9,
-    image: 'https://via.placeholder.com/300x200?text=OML+Удача'
   }
 ];
 
