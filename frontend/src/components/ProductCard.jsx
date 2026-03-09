@@ -11,7 +11,7 @@ export default function ProductCard({ product, onEdit, onDelete }) {
       if (i < fullStars) {
         stars.push(<span key={i} className="star filled">★</span>);
       } else if (i === fullStars && hasHalfStar) {
-        stars.push(<span key={i} className="star half">⯨</span>);
+        stars.push(<span key={i} className="star half">½</span>);
       } else {
         stars.push(<span key={i} className="star">☆</span>);
       }
@@ -19,49 +19,50 @@ export default function ProductCard({ product, onEdit, onDelete }) {
     return stars;
   };
 
-  // Определяем класс для статуса наличия
-  const stockStatus = product.stock > 10 
-    ? 'in-stock' 
-    : product.stock > 0 
-      ? 'low-stock' 
-      : 'out-of-stock';
+  // Статус наличия
+  const getStockStatus = () => {
+    if (product.stock > 20) return { class: 'stock-high', text: '✨ Много' };
+    if (product.stock > 5) return { class: 'stock-medium', text: '🔮 Достаточно' };
+    if (product.stock > 0) return { class: 'stock-low', text: '⚠️ Мало' };
+    return { class: 'stock-out', text: '❌ Нет' };
+  };
 
-  const stockText = product.stock > 0 
-    ? `В наличии: ${product.stock} шт.` 
-    : 'Нет в наличии';
+  const stockStatus = getStockStatus();
 
   return (
     <div className="product-card">
       <div className="product-card__image">
         <img src={product.image} alt={product.name} />
+        <div className="product-card__category-tag">{product.category}</div>
       </div>
       
       <div className="product-card__content">
-        <div className="product-card__category">{product.category}</div>
         <h3 className="product-card__title">{product.name}</h3>
         
         <div className="product-card__rating">
           {renderRating(product.rating)}
-          <span className="product-card__rating-value">{product.rating}</span>
+          <span className="rating-value">{product.rating}</span>
         </div>
         
         <p className="product-card__description">{product.description}</p>
         
-        <div className="product-card__price">{product.price.toLocaleString()} ₽</div>
+        <div className="product-card__price">
+          {product.price.toLocaleString()} ₽
+        </div>
         
-        <div className={`product-card__stock ${stockStatus}`}>
-          {stockText}
+        <div className={`product-card__stock ${stockStatus.class}`}>
+          {stockStatus.text} ({product.stock} шт.)
         </div>
         
         <div className="product-card__actions">
           <button 
-            className="btn btn--edit"
+            className="product-card__button product-card__button--edit"
             onClick={() => onEdit(product)}
           >
             ✏️ Редактировать
           </button>
           <button 
-            className="btn btn--delete"
+            className="product-card__button product-card__button--delete"
             onClick={() => onDelete(product.id)}
           >
             🗑️ Удалить

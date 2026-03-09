@@ -1,48 +1,67 @@
 import axios from 'axios';
 
-// Создаем экземпляр axios с базовым URL
+const API_URL = 'http://localhost:3000/api';
+
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Content-Type': 'application/json'
   }
 });
 
 export const api = {
   // Получить все товары
   getProducts: async () => {
-    const response = await apiClient.get('/products');
-    return response.data;
+    try {
+      const response = await apiClient.get('/products');
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения товаров:', error);
+      throw error;
+    }
   },
 
   // Получить товар по ID
   getProductById: async (id) => {
-    const response = await apiClient.get(`/products/${id}`);
-    return response.data;
-  },
-
-  // Получить товары по категории
-  getProductsByCategory: async (category) => {
-    const response = await apiClient.get(`/products/category/${category}`);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/products/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка получения товара:', error);
+      throw error;
+    }
   },
 
   // Создать новый товар
   createProduct: async (product) => {
-    const response = await apiClient.post('/products', product);
-    return response.data;
+    try {
+      const response = await apiClient.post('/products', product);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка создания товара:', error);
+      throw error;
+    }
   },
 
   // Обновить товар
   updateProduct: async (id, product) => {
-    const response = await apiClient.patch(`/products/${id}`, product);
-    return response.data;
+    try {
+      const response = await apiClient.patch(`/products/${id}`, product);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка обновления товара:', error);
+      throw error;
+    }
   },
 
   // Удалить товар
   deleteProduct: async (id) => {
-    const response = await apiClient.delete(`/products/${id}`);
-    return response.data;
+    try {
+      const response = await apiClient.delete(`/products/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка удаления товара:', error);
+      throw error;
+    }
   }
 };
