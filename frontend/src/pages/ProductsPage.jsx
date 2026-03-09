@@ -4,26 +4,24 @@ import { api } from '../api';
 import Header from '../components/Header';
 import ProductList from '../components/ProductList';
 import ProductModal from '../components/ProductModal';
+import AuthModal from '../components/AuthModal';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [categories, setCategories] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // Загрузка товаров
+  // Проверяем токен при загрузке
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      loadCurrentUser();
+    }
     loadProducts();
   }, []);
-
-  // Обновление списка категорий
-  useEffect(() => {
-    const unique = [...new Set(products.map(p => p.category))];
-    setCategories(unique);
-  }, [products]);
 
   const loadProducts = async () => {
     try {
@@ -31,106 +29,115 @@ export default function ProductsPage() {
       const data = await api.getProducts();
       setProducts(data);
     } catch (error) {
-      console.error('Ошибка загрузки:', error);
-      alert('Не удалось загрузить товары. Запущен ли сервер?');
+      console.error('Ошибка загрузки товаров:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddClick = () => {
-    setEditingProduct(null);
-    setModalOpen(true);
-  };
-
-  const handleEditClick = (product) => {
-    setEditingProduct(product);
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setEditingProduct(null);
-  };
-
-  const handleSaveProduct = async (productData) => {
+  const loadCurrentUser = async () => {
     try {
-      if (editingProduct) {
-        const updated = await api.updateProduct(editingProduct.id, productData);
-        setProducts(prev => prev.map(p => 
-          p.id === editingProduct.id ? updated : p
-        ));
-        alert('✅ Товар обновлён!');
-      } else {
-        const newProduct = await api.createProduct(productData);
-        setProducts(prev => [...prev, newProduct]);
-        alert('✅ Товар добавлен!');
-      }
-      handleCloseModal();
+      const userData = await api.getCurrentUser();
+      setUser(userData);
     } catch (error) {
-      console.error('Ошибка сохранения:', error);
-      alert('❌ Не удалось сохранить товар');
+      console.error('Ошибка загрузки пользователя:', error);
+      localStorage.removeItem('token');
     }
   };
 
-  const handleDeleteProduct = async (id) => {
-    const product = products.find(p => p.id === id);
-    if (!window.confirm(`Удалить "${product.name}"?`)) return;
+  const handleLogin = async (credentials) => {
+    try {
+      const data = await api.login(credentials);
+      localStorage.setItem('token', data.accessToken);
+      setUser(data.user);
+      setAuthModalOpen(false);
+      alert('✅ Вход выполнен успешно!');
+    } catch (error) {
+      alert('❌ Ошибка входа: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
+    }
+  };
 
+  const handleRegister = async (userData) => {
+    try {
+      await api.register(userData);
+      alert('✅ Регистрация успешна! Теперь войдите.');
+      // Переключаем на форму входа
+      setAuthModalOpen(true);
+    } catch (error) {
+      alert('❌ Ошибка регистрации: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
+  const handleAddProduct = () => {
+    if (!user) {
+      alert('Сначала войдите в систему');
+      setAuthModalOpen(true);
+      return;
+    }
+    setEditingProduct(null);
+    setProductModalOpen(true);
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProduct(product);
+    setProductModalOpen(true);
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('Удалить этот товар?')) return;
+    
     try {
       await api.deleteProduct(id);
       setProducts(prev => prev.filter(p => p.id !== id));
       alert('✅ Товар удалён');
     } catch (error) {
-      console.error('Ошибка удаления:', error);
-      alert('❌ Не удалось удалить товар');
+      alert('❌ Ошибка удаления: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
     }
   };
 
-  // Фильтрация товаров
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
-                         p.description.toLowerCase().includes(search.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const handleSaveProduct = async (productData) => {
+    try {
+      if (editingProduct) {
+        // Обновление
+        const updated = await api.updateProduct(editingProduct.id, productData);
+        setProducts(prev => prev.map(p => 
+          p.id === editingProduct.id ? updated : p
+        ));
+        alert('✅ Товар обновлён');
+      } else {
+        // Создание
+        const newProduct = await api.createProduct(productData);
+        setProducts(prev => [...prev, newProduct]);
+        alert('✅ Товар добавлен');
+      }
+      setProductModalOpen(false);
+    } catch (error) {
+      alert('❌ Ошибка сохранения: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
+    }
+  };
 
   return (
     <div className="page">
-      <Header />
+      <Header 
+        user={user} 
+        onLoginClick={() => setAuthModalOpen(true)}
+        onLogout={handleLogout}
+      />
 
       <main className="main">
         <div className="container">
           <div className="toolbar">
             <h1 className="page-title">🧙‍♂️ Лавка OML&CO</h1>
-            <button className="btn btn-primary" onClick={handleAddClick}>
-              ➕ Добавить товар
-            </button>
-          </div>
-
-          <div className="filters">
-            <input
-              type="text"
-              placeholder="🔮 Поиск среди колдовских вещей..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="search-input"
-            />
-
-            <select 
-              value={categoryFilter} 
-              onChange={e => setCategoryFilter(e.target.value)}
-              className="category-select"
-            >
-              <option value="all">Все категории</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="stats">
-            Найдено чудес: {filteredProducts.length}
+            {user && (
+              <button className="btn btn-primary" onClick={handleAddProduct}>
+                ➕ Добавить товар
+              </button>
+            )}
           </div>
 
           {loading ? (
@@ -140,9 +147,10 @@ export default function ProductsPage() {
             </div>
           ) : (
             <ProductList
-              products={filteredProducts}
-              onEdit={handleEditClick}
+              products={products}
+              onEdit={handleEditProduct}
               onDelete={handleDeleteProduct}
+              isAuthenticated={!!user}
             />
           )}
         </div>
@@ -154,9 +162,16 @@ export default function ProductsPage() {
         </div>
       </footer>
 
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+      />
+
       <ProductModal
-        isOpen={modalOpen}
-        onClose={handleCloseModal}
+        isOpen={productModalOpen}
+        onClose={() => setProductModalOpen(false)}
         onSubmit={handleSaveProduct}
         product={editingProduct}
       />

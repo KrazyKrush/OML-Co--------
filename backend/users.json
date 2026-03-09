@@ -1,0 +1,31 @@
+[
+  {
+    "id": "UIJS5HZ1",
+    "email": "ivan@omlco.ru",
+    "first_name": "Иван",
+    "last_name": "Петров",
+    "password": "$2b$10$aRQ16hN9A06ZMH9i5w6yKuEbjTUNTMNoqfyE/F4zNGzEfLuftzwoK",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVSUpTNUhaMSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzczMDg3NDA1LCJleHAiOjE3NzM2OTIyMDV9.6HX7V1nXP41vjJdDqzyt-6zubEGeSN9z3iT7IOjBcK0"
+  },
+  {
+    "id": "Co4BiZhE",
+    "email": "test@omlco.ru",
+    "first_name": "Тест",
+    "last_name": "Тестовый",
+    "password": "$2b$10$vI79uTeYPasM04I3ANA6W.9x6oSohXxSzTMVf5b1svkYD9bcTrxDK"
+  },
+  {
+    "id": "BjWvwaKr",
+    "email": "ivan@oml44co.ru",
+    "first_name": "Иван",
+    "last_name": "Петров45",
+    "password": "$2b$10$hM5.eCGhrQW3XDwG1tN6auZN48SuN5FsOHkUjGqNX82ayBW9Av.s2"
+  },
+  {
+    "id": "fKrNBs2p",
+    "email": "ivan@oml44434co.ru",
+    "first_name": "Иван",
+    "last_name": "Петров45",
+    "password": "$2b$10$mLxB4wmLndoODGrT.Yq1RuyEVvAPQyW19VZNErgwYyYEdVoCJNvkC"
+  }
+]

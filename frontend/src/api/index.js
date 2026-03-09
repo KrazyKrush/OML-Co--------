@@ -9,59 +9,59 @@ const apiClient = axios.create({
   }
 });
 
+// Перехватчик для добавления токена к запросам
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export const api = {
-  // Получить все товары
+  // ===== Аутентификация =====
+  register: async (userData) => {
+    const response = await apiClient.post('/auth/register', userData);
+    return response.data;
+  },
+
+  login: async (credentials) => {
+    const response = await apiClient.post('/auth/login', credentials);
+    return response.data;
+  },
+
+  getCurrentUser: async () => {
+    const response = await apiClient.get('/auth/me');
+    return response.data;
+  },
+
+  // ===== Товары (публичные) =====
   getProducts: async () => {
-    try {
-      const response = await apiClient.get('/products');
-      return response.data;
-    } catch (error) {
-      console.error('Ошибка получения товаров:', error);
-      throw error;
-    }
+    const response = await apiClient.get('/products');
+    return response.data;
   },
 
-  // Получить товар по ID
+  // ===== Товары (защищённые) =====
   getProductById: async (id) => {
-    try {
-      const response = await apiClient.get(`/products/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Ошибка получения товара:', error);
-      throw error;
-    }
+    const response = await apiClient.get(`/products/${id}`);
+    return response.data;
   },
 
-  // Создать новый товар
   createProduct: async (product) => {
-    try {
-      const response = await apiClient.post('/products', product);
-      return response.data;
-    } catch (error) {
-      console.error('Ошибка создания товара:', error);
-      throw error;
-    }
+    const response = await apiClient.post('/products', product);
+    return response.data;
   },
 
-  // Обновить товар
   updateProduct: async (id, product) => {
-    try {
-      const response = await apiClient.patch(`/products/${id}`, product);
-      return response.data;
-    } catch (error) {
-      console.error('Ошибка обновления товара:', error);
-      throw error;
-    }
+    const response = await apiClient.put(`/products/${id}`, product);
+    return response.data;
   },
 
-  // Удалить товар
   deleteProduct: async (id) => {
-    try {
-      const response = await apiClient.delete(`/products/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Ошибка удаления товара:', error);
-      throw error;
-    }
+    const response = await apiClient.delete(`/products/${id}`);
+    return response.data;
   }
 };

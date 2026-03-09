@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function ProductModal({ isOpen, onClose, onSubmit, product = null }) {
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     category: '',
     description: '',
     price: '',
@@ -14,7 +14,7 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
   useEffect(() => {
     if (product) {
       setFormData({
-        name: product.name || '',
+        title: product.title || '',
         category: product.category || '',
         description: product.description || '',
         price: product.price || '',
@@ -24,7 +24,7 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
       });
     } else {
       setFormData({
-        name: '',
+        title: '',
         category: '',
         description: '',
         price: '',
@@ -46,7 +46,7 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
     const productData = {
       ...formData,
       price: Number(formData.price),
-      stock: Number(formData.stock),
+      stock: formData.stock ? Number(formData.stock) : 0,
       rating: formData.rating ? Number(formData.rating) : 0
     };
     
@@ -68,10 +68,9 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
             <label>Название товара *</label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="title"
+              value={formData.title}
               onChange={handleChange}
-              placeholder="Например: Зелье от похмелья"
               required
             />
           </div>
@@ -84,7 +83,6 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                placeholder="Например: Зелья OML"
                 required
               />
             </div>
@@ -96,9 +94,7 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                placeholder="299"
                 min="0"
-                step="1"
                 required
               />
             </div>
@@ -110,7 +106,6 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
               name="description"
               value={formData.description}
               onChange={handleChange}
-              placeholder="Волшебное описание товара..."
               rows="3"
               required
             />
@@ -118,16 +113,13 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
 
           <div className="form-row">
             <div className="form-group">
-              <label>Количество на складе *</label>
+              <label>Количество на складе</label>
               <input
                 type="number"
                 name="stock"
                 value={formData.stock}
                 onChange={handleChange}
-                placeholder="42"
                 min="0"
-                step="1"
-                required
               />
             </div>
 
@@ -138,7 +130,6 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
                 name="rating"
                 value={formData.rating}
                 onChange={handleChange}
-                placeholder="4.5"
                 min="0"
                 max="5"
                 step="0.1"
@@ -153,9 +144,8 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
               name="image"
               value={formData.image}
               onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
+              placeholder="https://..."
             />
-            <small className="hint">Если не указать, будет использовано изображение по умолчанию</small>
           </div>
 
           <div className="modal-footer">
@@ -163,7 +153,7 @@ export default function ProductModal({ isOpen, onClose, onSubmit, product = null
               Отмена
             </button>
             <button type="submit" className="btn btn-primary">
-              {product ? 'Сохранить изменения' : 'Добавить товар'}
+              {product ? 'Сохранить' : 'Создать'}
             </button>
           </div>
         </form>

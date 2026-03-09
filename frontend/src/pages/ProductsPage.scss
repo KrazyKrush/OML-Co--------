@@ -45,9 +45,29 @@ body {
     }
   }
 
-  &__right {
-    color: #b5adff;
-    font-style: italic;
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .user-name {
+      color: #b794f4;
+    }
+  }
+
+  .btn-login, .btn-logout {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #b794f4;
+    background: transparent;
+    color: #b794f4;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #b794f4;
+      color: #0c0a1f;
+    }
   }
 }
 
@@ -89,7 +109,6 @@ body {
   font-size: 16px;
   cursor: pointer;
   transition: all 0.2s;
-  font-weight: 500;
 
   &:hover {
     transform: translateY(-2px);
@@ -116,54 +135,6 @@ body {
   }
 }
 
-// Фильтры
-.filters {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-
-  .search-input {
-    flex: 1;
-    padding: 12px 20px;
-    border-radius: 30px;
-    border: 1px solid #332e5e;
-    background: #1a1730;
-    color: #eae6ff;
-    font-size: 16px;
-
-    &::placeholder {
-      color: #b5adff;
-    }
-
-    &:focus {
-      outline: none;
-      border-color: #b794f4;
-    }
-  }
-
-  .category-select {
-    padding: 12px 20px;
-    border-radius: 30px;
-    border: 1px solid #332e5e;
-    background: #1a1730;
-    color: #eae6ff;
-    font-size: 16px;
-    min-width: 200px;
-
-    &:focus {
-      outline: none;
-      border-color: #b794f4;
-    }
-  }
-}
-
-// Статистика
-.stats {
-  margin-bottom: 24px;
-  color: #b5adff;
-  font-size: 18px;
-}
-
 // Сетка товаров
 .products-grid {
   display: grid;
@@ -179,8 +150,6 @@ body {
   overflow: hidden;
   border: 1px solid #332e5e;
   transition: transform 0.2s, box-shadow 0.2s;
-  display: flex;
-  flex-direction: column;
 
   &:hover {
     transform: translateY(-4px);
@@ -219,9 +188,6 @@ body {
 
   &__content {
     padding: 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
   }
 
   &__title {
@@ -229,25 +195,14 @@ body {
     font-weight: 600;
     margin-bottom: 8px;
     color: #eae6ff;
-    line-height: 1.3;
-    min-height: 46px;
   }
 
   &__rating {
     margin-bottom: 12px;
     color: #fbbf24;
-    font-size: 16px;
 
     .star {
       margin-right: 2px;
-      
-      &.filled {
-        color: #fbbf24;
-      }
-      
-      &.half {
-        color: #fbbf24;
-      }
     }
 
     .rating-value {
@@ -262,31 +217,24 @@ body {
     font-size: 14px;
     line-height: 1.5;
     margin-bottom: 16px;
-    flex: 1;
   }
 
   &__price {
     font-size: 22px;
     font-weight: bold;
     color: #b794f4;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   &__stock {
     font-size: 13px;
     margin-bottom: 16px;
-    padding: 4px 0;
-
-    &.stock-high { color: #9ae6b4; }
-    &.stock-medium { color: #b794f4; }
-    &.stock-low { color: #fbd38d; }
-    &.stock-out { color: #feb2b2; }
+    color: #9ae6b4;
   }
 
   &__actions {
     display: flex;
     gap: 8px;
-    margin-top: 8px;
   }
 
   &__button {
@@ -296,8 +244,8 @@ body {
     border: 1px solid;
     font-size: 13px;
     cursor: pointer;
-    transition: all 0.2s;
     background: transparent;
+    transition: all 0.2s;
 
     &--edit {
       border-color: #b794f4;
@@ -381,7 +329,7 @@ body {
   }
 }
 
-// ========== МОДАЛЬНОЕ ОКНО ==========
+// ========== МОДАЛЬНЫЕ ОКНА ==========
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -400,11 +348,14 @@ body {
   background: #1a1730;
   border-radius: 20px;
   border: 1px solid #b794f4;
-  max-width: 600px;
+  max-width: 500px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(183, 148, 244, 0.3);
+
+  &-auth {
+    max-width: 400px;
+  }
 
   &-header {
     padding: 20px;
@@ -455,39 +406,25 @@ body {
     margin-bottom: 8px;
     color: #b5adff;
     font-size: 14px;
-    font-weight: 500;
   }
 
-  input, textarea, select {
+  input, textarea {
     width: 100%;
-    padding: 12px;
+    padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid #332e5e;
     background: rgba(255, 255, 255, 0.05);
     color: #eae6ff;
     font-size: 16px;
-    transition: border-color 0.2s;
 
     &:focus {
       outline: none;
       border-color: #b794f4;
     }
-
-    &::placeholder {
-      color: #5a4e8a;
-    }
   }
 
   textarea {
     resize: vertical;
-    min-height: 80px;
-  }
-
-  .hint {
-    display: block;
-    margin-top: 4px;
-    color: #5a4e8a;
-    font-size: 12px;
   }
 }
 
@@ -497,20 +434,32 @@ body {
   gap: 16px;
 }
 
-// Адаптивность для мобильных
+// Переключатель входа/регистрации
+.auth-switch {
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid #332e5e;
+  color: #b5adff;
+
+  .switch-btn {
+    background: none;
+    border: none;
+    color: #b794f4;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 14px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Адаптивность
 @media (max-width: 768px) {
   .products-grid {
     grid-template-columns: 1fr;
     gap: 16px;
-  }
-
-  .filters {
-    flex-direction: column;
-    
-    .search-input,
-    .category-select {
-      width: 100%;
-    }
   }
 
   .toolbar {
@@ -521,5 +470,10 @@ body {
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+
+  .header__inner {
+    flex-direction: column;
+    gap: 12px;
   }
 }
