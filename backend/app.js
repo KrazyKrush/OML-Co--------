@@ -20,6 +20,10 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'omlco_refresh_secr
 const JWT_ACCESS_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
+// ========== ХРАНИЛИЩЕ REFRESH-ТОКЕНОВ (в памяти) ==========
+// В реальном проекте нужно использовать БД, но для учебных целей подойдёт Set
+const refreshTokenStore = new Set();
+
 // ========== РАБОТА С ФАЙЛАМИ ==========
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
 const USERS_FILE = path.join(__dirname, 'users.json');
@@ -75,11 +79,11 @@ async function verifyPassword(password, hash) {
 // ========== ФУНКЦИИ ДЛЯ РАБОТЫ С JWT ==========
 
 /**
- * Создание access-токена (короткоживущий)
+ * Создание access-токена (короткоживущий, 15 минут)
  */
 function generateAccessToken(user) {
   const payload = {
-    sub: user.id,           // subject - идентификатор пользователя
+    sub: user.id,
     email: user.email,
     first_name: user.first_name,
     last_name: user.last_name,
@@ -92,7 +96,7 @@ function generateAccessToken(user) {
 }
 
 /**
- * Создание refresh-токена (долгоживущий)
+ * Создание refresh-токена (долгоживущий, 7 дней)
  */
 function generateRefreshToken(user) {
   const payload = {
@@ -131,7 +135,6 @@ function verifyRefreshToken(token) {
 
 /**
  * Middleware для проверки access-токена
- * Ожидает заголовок: Authorization: Bearer <token>
  */
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -147,11 +150,10 @@ function authMiddleware(req, res, next) {
 
   if (!decoded) {
     return res.status(401).json({ 
-      error: 'Недействительный или истёкший токен' 
+      error: 'Недействительный или истёкший access-токен' 
     });
   }
 
-  // Добавляем информацию о пользователе в запрос
   req.user = decoded;
   next();
 }
@@ -174,36 +176,23 @@ const swaggerOptions = {
       description: `
         API для управления товарами и пользователями в магической лавке OML&CO.
         
-        ## 🔐 JWT Аутентификация
-        Для доступа к защищённым маршрутам требуется JWT токен.
+        ## 🔐 JWT Аутентификация с refresh-токенами
         
         **Схема работы:**
         1. Регистрация: \`POST /api/auth/register\`
-        2. Вход: \`POST /api/auth/login\` → получаете \`accessToken\` и \`refreshToken\`
-        3. Для защищённых маршрутов добавляйте заголовок: \`Authorization: Bearer <accessToken>\`
-        4. Когда accessToken истечёт, используйте \`POST /api/auth/refresh\` для получения новой пары токенов
+        2. Вход: \`POST /api/auth/login\` → получаете \`accessToken\` (15 мин) и \`refreshToken\` (7 дней)
+        3. Для защищённых маршрутов используйте \`Authorization: Bearer <accessToken>\`
+        4. Когда accessToken истечёт, отправьте \`POST /api/auth/refresh\` с \`refreshToken\` в теле
+        5. Получите новую пару токенов
         
         **Типы токенов:**
-        * 🔑 **Access Token** — живёт 15 минут, используется для доступа к API
-        * 🔄 **Refresh Token** — живёт 7 дней, используется для обновления access-токена
+        * 🔑 **Access Token** — живёт 15 минут, для доступа к API
+        * 🔄 **Refresh Token** — живёт 7 дней, для обновления access-токена (одноразовый)
         
-        **Защищённые маршруты (требуют токен):**
-        * \`GET    /api/auth/me\` - информация о текущем пользователе
-        * \`POST   /api/auth/refresh\` - обновление токенов
-        * \`POST   /api/products\` - создание товара
-        * \`GET    /api/products/:id\` - получение товара (защищён)
-        * \`PUT    /api/products/:id\` - обновление товара
-        * \`DELETE /api/products/:id\` - удаление товара
-        
-        **Публичные маршруты (доступны без токена):**
-        * \`POST   /api/auth/register\` - регистрация
-        * \`POST   /api/auth/login\` - вход
-        * \`GET    /api/products\` - список всех товаров
+        **Ротация refresh-токенов:**
+        * Каждый refresh-токен можно использовать только один раз
+        * При обновлении старый токен удаляется, выдаётся новый
       `,
-      contact: {
-        name: 'OML&CO',
-        url: 'http://localhost:3001',
-      },
     },
     servers: [
       {
@@ -214,11 +203,11 @@ const swaggerOptions = {
     tags: [
       {
         name: 'Auth',
-        description: '🔐 Регистрация, вход и управление токенами',
+        description: '🔐 Регистрация, вход и обновление токенов',
       },
       {
         name: 'Products',
-        description: '📦 Управление товарами (защищённые маршруты)',
+        description: '📦 Управление товарами',
       },
     ],
     components: {
@@ -227,7 +216,7 @@ const swaggerOptions = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Введите JWT access-токен, полученный при входе'
+          description: 'Введите JWT access-токен'
         }
       },
       schemas: {
@@ -238,22 +227,6 @@ const swaggerOptions = {
             email: { type: 'string', example: 'ivan@omlco.ru' },
             first_name: { type: 'string', example: 'Иван' },
             last_name: { type: 'string', example: 'Петров' }
-          }
-        },
-        Product: {
-          type: 'object',
-          required: ['title', 'category', 'description', 'price'],
-          properties: {
-            id: { type: 'string', example: 'abc12345' },
-            title: { type: 'string', example: 'Зелье от похмелья' },
-            category: { type: 'string', example: 'Зелья OML' },
-            description: { type: 'string', example: 'Фирменное зелье OML&CO' },
-            price: { type: 'number', example: 299 },
-            stock: { type: 'integer', example: 42 },
-            rating: { type: 'number', example: 4.7 },
-            image: { type: 'string', example: '/images/zelye.jpg' },
-            createdBy: { type: 'string', example: 'ivan@omlco.ru' },
-            createdAt: { type: 'string', format: 'date-time' }
           }
         },
         LoginRequest: {
@@ -273,10 +246,18 @@ const swaggerOptions = {
             user: { $ref: '#/components/schemas/User' }
           }
         },
-        Error: {
+        RefreshRequest: {
+          type: 'object',
+          required: ['refreshToken'],
+          properties: {
+            refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIs...' }
+          }
+        },
+        RefreshResponse: {
           type: 'object',
           properties: {
-            error: { type: 'string', example: 'Ошибка авторизации' }
+            accessToken: { type: 'string' },
+            refreshToken: { type: 'string' }
           }
         }
       }
@@ -286,19 +267,12 @@ const swaggerOptions = {
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
-// Кастомизация Swagger UI
-const swaggerUiOptions = {
-  customCss: '.swagger-ui .topbar { display: none }',
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'OML&CO API Documentation',
   swaggerOptions: {
     persistAuthorization: true,
-    displayRequestDuration: true,
-    filter: true,
   }
-};
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+}));
 
 // ============= МАРШРУТЫ АУТЕНТИФИКАЦИИ =============
 
@@ -307,7 +281,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOpti
  * /api/auth/register:
  *   post:
  *     summary: Регистрация нового пользователя
- *     description: Создаёт нового пользователя с хешированием пароля
  *     tags: [Auth]
  *     security: []
  *     requestBody:
@@ -322,40 +295,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOpti
  *               - last_name
  *               - password
  *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "ivan@omlco.ru"
- *               first_name:
- *                 type: string
- *                 example: "Иван"
- *               last_name:
- *                 type: string
- *                 example: "Петров"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "qwerty123"
+ *               email: { type: string, example: "ivan@omlco.ru" }
+ *               first_name: { type: string, example: "Иван" }
+ *               last_name: { type: string, example: "Петров" }
+ *               password: { type: string, example: "qwerty123" }
  *     responses:
  *       201:
- *         description: Пользователь успешно создан
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 email:
- *                   type: string
- *                 first_name:
- *                   type: string
- *                 last_name:
- *                   type: string
- *                 message:
- *                   type: string
- *       400:
- *         description: Ошибка валидации
+ *         description: Пользователь создан
  */
 app.post('/api/auth/register', async (req, res) => {
   const { email, first_name, last_name, password } = req.body;
@@ -369,9 +315,8 @@ app.post('/api/auth/register', async (req, res) => {
   try {
     const users = await readUsers();
     
-    const existingUser = users.find(u => u.email === email);
-    if (existingUser) {
-      return res.status(400).json({ error: 'Пользователь с таким email уже существует' });
+    if (users.find(u => u.email === email)) {
+      return res.status(400).json({ error: 'Email уже используется' });
     }
 
     const hashedPassword = await hashPassword(password);
@@ -389,10 +334,7 @@ app.post('/api/auth/register', async (req, res) => {
     await writeUsers(users);
 
     const { password: _, ...userWithoutPassword } = newUser;
-    res.status(201).json({ 
-      ...userWithoutPassword,
-      message: 'Пользователь успешно зарегистрирован' 
-    });
+    res.status(201).json(userWithoutPassword);
 
   } catch (error) {
     console.error('Ошибка регистрации:', error);
@@ -405,7 +347,7 @@ app.post('/api/auth/register', async (req, res) => {
  * /api/auth/login:
  *   post:
  *     summary: Вход в систему
- *     description: Проверяет email и пароль, возвращает access и refresh токены
+ *     description: Возвращает accessToken (15 мин) и refreshToken (7 дней)
  *     tags: [Auth]
  *     security: []
  *     requestBody:
@@ -421,12 +363,6 @@ app.post('/api/auth/register', async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/LoginResponse'
- *       400:
- *         description: Не указаны email или пароль
- *       401:
- *         description: Неверный пароль
- *       404:
- *         description: Пользователь не найден
  */
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
@@ -445,28 +381,26 @@ app.post('/api/auth/login', async (req, res) => {
 
     const isPasswordValid = await verifyPassword(password, user.password);
 
-    if (isPasswordValid) {
-      const { password: _, ...userWithoutPassword } = user;
-      
-      // Генерируем токены
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
-
-      // В реальном проекте refreshToken нужно сохранить в БД
-      // Здесь для простоты сохраняем в том же файле users.json
-      user.refreshToken = refreshToken;
-      await writeUsers(users);
-      
-      res.json({ 
-        login: true, 
-        accessToken,
-        refreshToken,
-        user: userWithoutPassword,
-        message: 'Вход выполнен успешно' 
-      });
-    } else {
-      res.status(401).json({ error: 'Неверный пароль' });
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Неверный пароль' });
     }
+
+    // Генерируем токены
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    // Сохраняем refreshToken в хранилище
+    refreshTokenStore.add(refreshToken);
+
+    // Не возвращаем пароль
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.json({ 
+      login: true,
+      accessToken,
+      refreshToken,
+      user: userWithoutPassword
+    });
 
   } catch (error) {
     console.error('Ошибка входа:', error);
@@ -479,7 +413,7 @@ app.post('/api/auth/login', async (req, res) => {
  * /api/auth/refresh:
  *   post:
  *     summary: Обновление токенов
- *     description: Получает новую пару access и refresh токенов по действующему refresh токену
+ *     description: Получает новую пару токенов по refresh-токену (одноразовый)
  *     tags: [Auth]
  *     security: []
  *     requestBody:
@@ -487,27 +421,18 @@ app.post('/api/auth/login', async (req, res) => {
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - refreshToken
- *             properties:
- *               refreshToken:
- *                 type: string
- *                 example: "eyJhbGciOiJIUzI1NiIs..."
+ *             $ref: '#/components/schemas/RefreshRequest'
  *     responses:
  *       200:
- *         description: Токены успешно обновлены
+ *         description: Новая пара токенов
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 accessToken:
- *                   type: string
- *                 refreshToken:
- *                   type: string
+ *               $ref: '#/components/schemas/RefreshResponse'
+ *       400:
+ *         description: refreshToken обязателен
  *       401:
- *         description: Недействительный refresh токен
+ *         description: Недействительный или использованный refresh-токен
  */
 app.post('/api/auth/refresh', async (req, res) => {
   const { refreshToken } = req.body;
@@ -516,28 +441,39 @@ app.post('/api/auth/refresh', async (req, res) => {
     return res.status(400).json({ error: 'refreshToken обязателен' });
   }
 
+  // Проверяем, что токен есть в хранилище (не использован)
+  if (!refreshTokenStore.has(refreshToken)) {
+    return res.status(401).json({ error: 'Недействительный или использованный refresh-токен' });
+  }
+
   try {
-    // Проверяем refresh токен
-    const decoded = verifyRefreshToken(refreshToken);
-    if (!decoded) {
-      return res.status(401).json({ error: 'Недействительный refresh токен' });
+    // Валидируем refresh-токен
+    const payload = verifyRefreshToken(refreshToken);
+    if (!payload) {
+      // Если токен невалидный, удаляем его из хранилища
+      refreshTokenStore.delete(refreshToken);
+      return res.status(401).json({ error: 'Недействительный или истёкший refresh-токен' });
     }
 
-    // Ищем пользователя
+    // Находим пользователя
     const users = await readUsers();
-    const user = users.find(u => u.id === decoded.sub);
+    const user = users.find(u => u.id === payload.sub);
 
-    if (!user || user.refreshToken !== refreshToken) {
-      return res.status(401).json({ error: 'Пользователь не найден или токен недействителен' });
+    if (!user) {
+      // Пользователь не найден - удаляем токен
+      refreshTokenStore.delete(refreshToken);
+      return res.status(401).json({ error: 'Пользователь не найден' });
     }
 
-    // Генерируем новые токены
+    // Ротация refresh-токена: удаляем старый
+    refreshTokenStore.delete(refreshToken);
+
+    // Генерируем новую пару токенов
     const newAccessToken = generateAccessToken(user);
     const newRefreshToken = generateRefreshToken(user);
 
-    // Обновляем refresh токен в БД
-    user.refreshToken = newRefreshToken;
-    await writeUsers(users);
+    // Сохраняем новый refresh-токен
+    refreshTokenStore.add(newRefreshToken);
 
     res.json({
       accessToken: newAccessToken,
@@ -546,6 +482,7 @@ app.post('/api/auth/refresh', async (req, res) => {
 
   } catch (error) {
     console.error('Ошибка обновления токенов:', error);
+    refreshTokenStore.delete(refreshToken);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
@@ -555,7 +492,6 @@ app.post('/api/auth/refresh', async (req, res) => {
  * /api/auth/me:
  *   get:
  *     summary: Информация о текущем пользователе
- *     description: Возвращает данные авторизованного пользователя (требуется токен)
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
@@ -566,8 +502,6 @@ app.post('/api/auth/refresh', async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
- *       401:
- *         description: Не авторизован
  */
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
   try {
@@ -578,33 +512,26 @@ app.get('/api/auth/me', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Пользователь не найден' });
     }
 
-    const { password: _, refreshToken: __, ...userWithoutSensitive } = user;
-    res.json(userWithoutSensitive);
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   } catch (error) {
-    console.error('Ошибка получения пользователя:', error);
+    console.error('Ошибка:', error);
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
 
-// ============= ПУБЛИЧНЫЕ МАРШРУТЫ ДЛЯ ТОВАРОВ =============
+// ============= МАРШРУТЫ ДЛЯ ТОВАРОВ =============
 
 /**
  * @swagger
  * /api/products:
  *   get:
  *     summary: Получить все товары
- *     description: Публичный доступ, не требует авторизации
  *     tags: [Products]
  *     security: []
  *     responses:
  *       200:
  *         description: Список товаров
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Product'
  */
 app.get('/api/products', async (req, res) => {
   try {
@@ -616,14 +543,11 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// ============= ЗАЩИЩЁННЫЕ МАРШРУТЫ ДЛЯ ТОВАРОВ =============
-
 /**
  * @swagger
  * /api/products/{id}:
  *   get:
  *     summary: Получить товар по ID
- *     description: Требуется авторизация (JWT токен)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -631,19 +555,9 @@ app.get('/api/products', async (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       200:
  *         description: Товар найден
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Product'
- *       401:
- *         description: Не авторизован
- *       404:
- *         description: Товар не найден
  */
 app.get('/api/products/:id', authMiddleware, async (req, res) => {
   try {
@@ -666,7 +580,6 @@ app.get('/api/products/:id', authMiddleware, async (req, res) => {
  * /api/products:
  *   post:
  *     summary: Создать новый товар
- *     description: Требуется авторизация (JWT токен)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -682,38 +595,16 @@ app.get('/api/products/:id', authMiddleware, async (req, res) => {
  *               - description
  *               - price
  *             properties:
- *               title:
- *                 type: string
- *                 example: "Зелье удачи"
- *               category:
- *                 type: string
- *                 example: "Зелья OML"
- *               description:
- *                 type: string
- *                 example: "Приносит удачу, но отнимает носки"
- *               price:
- *                 type: number
- *                 example: 399
- *               stock:
- *                 type: integer
- *                 example: 50
- *               rating:
- *                 type: number
- *                 example: 4.5
- *               image:
- *                 type: string
- *                 example: "/images/udacha.jpg"
+ *               title: { type: string }
+ *               category: { type: string }
+ *               description: { type: string }
+ *               price: { type: number }
+ *               stock: { type: integer }
+ *               rating: { type: number }
+ *               image: { type: string }
  *     responses:
  *       201:
  *         description: Товар создан
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Product'
- *       400:
- *         description: Ошибка валидации
- *       401:
- *         description: Не авторизован
  */
 app.post('/api/products', authMiddleware, async (req, res) => {
   const { title, category, description, price, stock, rating, image } = req.body;
@@ -754,8 +645,7 @@ app.post('/api/products', authMiddleware, async (req, res) => {
  * @swagger
  * /api/products/{id}:
  *   put:
- *     summary: Обновить товар полностью
- *     description: Требуется авторизация (JWT токен)
+ *     summary: Обновить товар
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -763,21 +653,11 @@ app.post('/api/products', authMiddleware, async (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
  *     requestBody:
  *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Product'
  *     responses:
  *       200:
  *         description: Товар обновлен
- *       401:
- *         description: Не авторизован
- *       404:
- *         description: Товар не найден
  */
 app.put('/api/products/:id', authMiddleware, async (req, res) => {
   try {
@@ -818,7 +698,6 @@ app.put('/api/products/:id', authMiddleware, async (req, res) => {
  * /api/products/{id}:
  *   delete:
  *     summary: Удалить товар
- *     description: Требуется авторизация (JWT токен)
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -826,15 +705,9 @@ app.put('/api/products/:id', authMiddleware, async (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       204:
  *         description: Товар удален
- *       401:
- *         description: Не авторизован
- *       404:
- *         description: Товар не найден
  */
 app.delete('/api/products/:id', authMiddleware, async (req, res) => {
   try {
@@ -871,16 +744,9 @@ app.listen(port, () => {
   console.log(`\n🔐 JWT Настройки:`);
   console.log(`   Access Token: ${JWT_ACCESS_EXPIRES_IN}`);
   console.log(`   Refresh Token: ${JWT_REFRESH_EXPIRES_IN}`);
-  console.log(`\n📋 Маршруты:`);
-  console.log(`   🔓 Публичные:`);
+  console.log(`\n📋 Маршруты аутентификации:`);
   console.log(`   POST   /api/auth/register`);
   console.log(`   POST   /api/auth/login`);
-  console.log(`   GET    /api/products (публичный)`);
-  console.log(`   🔒 Защищённые (требуют Bearer токен):`);
-  console.log(`   GET    /api/auth/me`);
   console.log(`   POST   /api/auth/refresh`);
-  console.log(`   GET    /api/products/:id`);
-  console.log(`   POST   /api/products`);
-  console.log(`   PUT    /api/products/:id`);
-  console.log(`   DELETE /api/products/:id`);
+  console.log(`   GET    /api/auth/me (защищён)`);
 });

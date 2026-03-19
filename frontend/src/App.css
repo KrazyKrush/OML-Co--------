@@ -1,38 +1,467 @@
-.App {
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  background: #0c0a1f;
+  color: #eae6ff;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+/* Страницы авторизации */
+.auth-page {
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background: linear-gradient(135deg, #0c0a1f 0%, #1a1730 100%);
 }
 
-.App-link {
-  color: #61dafb;
+.auth-container {
+  background: #1a1730;
+  padding: 40px;
+  border-radius: 20px;
+  border: 1px solid #332e5e;
+  width: 100%;
+  max-width: 400px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.auth-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #b794f4;
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 20px;
+  color: #b5adff;
+}
+
+.auth-link a {
+  color: #b794f4;
+  text-decoration: none;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+/* Шапка */
+.header {
+  background: linear-gradient(135deg, #0c0a1f 0%, #1a1730 100%);
+  border-bottom: 1px solid #332e5e;
+}
+
+.header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  font-size: 28px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #b794f4, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+}
+
+.brand__icon {
+  -webkit-text-fill-color: initial;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-name {
+  color: #b5adff;
+}
+
+.btn-login, .btn-logout {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #b794f4;
+  background: transparent;
+  color: #b794f4;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-login:hover, .btn-logout:hover {
+  background: #b794f4;
+  color: #0c0a1f;
+}
+
+/* Основной контент */
+.main {
+  padding: 40px 20px;
+  min-height: calc(100vh - 80px);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.page-title {
+  font-size: 32px;
+  background: linear-gradient(135deg, #b794f4, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Кнопки */
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #b794f4;
+  color: #0c0a1f;
+}
+
+.btn-primary:hover {
+  background: #d6bcfa;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid #332e5e;
+  color: #eae6ff;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-danger {
+  background: #feb2b2;
+  color: #0c0a1f;
+}
+
+.btn-danger:hover {
+  background: #fc8181;
+}
+
+/* Карточки товаров */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.product-card {
+  background: #1a1730;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #332e5e;
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  border-color: #b794f4;
+}
+
+.product-card__link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.product-card__image {
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-card__category-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  background: rgba(12, 10, 31, 0.9);
+  border-radius: 20px;
+  font-size: 12px;
+  border: 1px solid #b794f4;
+  color: #b794f4;
+}
+
+.product-card__content {
+  padding: 16px;
+}
+
+.product-card__title {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #eae6ff;
+}
+
+.product-card__description {
+  color: #b5adff;
+  font-size: 14px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.product-card__price {
+  font-size: 20px;
+  font-weight: bold;
+  color: #b794f4;
+  margin-bottom: 8px;
+}
+
+.product-card__stock {
+  font-size: 13px;
+  color: #9ae6b4;
+  margin-bottom: 12px;
+}
+
+.product-card__actions {
+  padding: 16px;
+  border-top: 1px solid #332e5e;
+  display: flex;
+  gap: 8px;
+}
+
+.product-card__button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.product-card__button--edit {
+  border-color: #b794f4;
+  color: #b794f4;
+}
+
+.product-card__button--edit:hover {
+  background: #b794f4;
+  color: #0c0a1f;
+}
+
+.product-card__button--delete {
+  border-color: #feb2b2;
+  color: #feb2b2;
+}
+
+.product-card__button--delete:hover {
+  background: #feb2b2;
+  color: #0c0a1f;
+}
+
+/* Детальная страница товара */
+.product-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  background: #1a1730;
+  border-radius: 12px;
+  padding: 30px;
+  border: 1px solid #332e5e;
+}
+
+.product-detail__image img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.product-detail__info h1 {
+  font-size: 32px;
+  margin-bottom: 16px;
+  color: #eae6ff;
+}
+
+.product-detail__category {
+  color: #b794f4;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.product-detail__price {
+  font-size: 28px;
+  font-weight: bold;
+  color: #b794f4;
+  margin-bottom: 16px;
+}
+
+.product-detail__stock {
+  color: #9ae6b4;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.product-detail__rating {
+  color: #fbbf24;
+  font-size: 16px;
+  margin-bottom: 24px;
+}
+
+.product-detail__description {
+  line-height: 1.6;
+  color: #b5adff;
+  margin-bottom: 30px;
+}
+
+.product-detail__actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* Формы */
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #1a1730;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #332e5e;
+}
+
+.form-container h1 {
+  margin-bottom: 30px;
+  color: #b794f4;
+}
+
+.product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #b5adff;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #332e5e;
+  background: rgba(255, 255, 255, 0.05);
+  color: #eae6ff;
+  font-size: 16px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #b794f4;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Сообщения */
+.error-message {
+  background: rgba(254, 178, 178, 0.1);
+  border: 1px solid #feb2b2;
+  color: #feb2b2;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.success-message {
+  background: rgba(154, 230, 180, 0.1);
+  border: 1px solid #9ae6b4;
+  color: #9ae6b4;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+/* Загрузка */
+.loading {
+  text-align: center;
+  padding: 60px;
+  color: #b5adff;
+}
+
+.spinner {
+  font-size: 48px;
+  animation: spin 2s infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .product-detail {
+    grid-template-columns: 1fr;
   }
-  to {
-    transform: rotate(360deg);
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .toolbar {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
   }
 }

@@ -1,13 +1,22 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../api';
 
-export default function Header({ user, onLoginClick, onLogout }) {
+export default function Header({ user }) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    api.logout();
+    navigate('/login');
+  };
+
   return (
     <header className="header">
       <div className="header__inner">
-        <div className="brand">
+        <Link to="/" className="brand">
           <span className="brand__icon">🧙‍♂️</span>
           OML&CO
-        </div>
+        </Link>
         
         <div className="header__right">
           {user ? (
@@ -15,14 +24,14 @@ export default function Header({ user, onLoginClick, onLogout }) {
               <span className="user-name">
                 {user.first_name} {user.last_name}
               </span>
-              <button className="btn-logout" onClick={onLogout}>
+              <button className="btn-logout" onClick={handleLogout}>
                 Выйти
               </button>
             </div>
           ) : (
-            <button className="btn-login" onClick={onLoginClick}>
+            <Link to="/login" className="btn-login">
               🔐 Войти
-            </button>
+            </Link>
           )}
         </div>
       </div>

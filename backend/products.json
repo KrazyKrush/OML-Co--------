@@ -40,16 +40,6 @@
     "image": "https://i.pinimg.com/736x/8e/ac/cf/8eaccfbd1229d55e630f29fb32b2d5c1.jpg"
   },
   {
-    "id": "5",
-    "title": "Котелок для зелий \"Антипригарный OML\"",
-    "category": "Посуда OML",
-    "description": "Варите зелья и не отмывайте потом неделю. Тефлоновое покрытие выдерживает даже кислоту. Разработка OML&CO.",
-    "price": 2499,
-    "stock": 8,
-    "rating": 4.8,
-    "image": "https://i.pinimg.com/736x/8e/ac/cf/8eaccfbd1229d55e630f29fb32b2d5c1.jpg"
-  },
-  {
     "id": "6",
     "title": "Метла \"Спортивная OML Pro\"",
     "category": "Транспорт OML",
@@ -142,5 +132,17 @@
     "image": "https://cdn1.ozone.ru/s3/multimedia-1-z/7818612047.jpg",
     "createdBy": "ivan@omlco.ru",
     "createdAt": "2026-03-09T20:17:29.014Z"
+  },
+  {
+    "id": "g6_V6dGY",
+    "title": "Скатерть самобранка",
+    "category": "Еда",
+    "description": "Не надо ходить в магазин",
+    "price": 320,
+    "stock": 3,
+    "rating": 4.9,
+    "image": "https://avatars.mds.yandex.net/i?id=585760c45f796610010dd3dab9b6efb6_l-5220454-images-thumbs&n=13",
+    "createdBy": "elena@yandex.ru",
+    "createdAt": "2026-03-10T06:41:52.910Z"
   }
 ]

@@ -27,5 +27,14 @@
     "first_name": "Иван",
     "last_name": "Петров45",
     "password": "$2b$10$mLxB4wmLndoODGrT.Yq1RuyEVvAPQyW19VZNErgwYyYEdVoCJNvkC"
+  },
+  {
+    "id": "060jV4UA",
+    "email": "elena@yandex.ru",
+    "first_name": "Елена",
+    "last_name": "Анфилова",
+    "password": "$2b$10$n69dazwmKGGMsRNRMRcmNeCBa6BHosyjHEGj7DtkQa0bpLrgfmUMC",
+    "createdAt": "2026-03-10T06:36:49.618Z",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjBqVjRVQSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzczOTI3MDU4LCJleHAiOjE3NzQ1MzE4NTh9.NCj9F7H9I7R37lptfYVZNjCP4EhJWoBNEi4nA5YTipQ"
   }
 ]
