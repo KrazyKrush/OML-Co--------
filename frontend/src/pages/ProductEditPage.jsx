@@ -3,9 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import Header from '../components/Header';
 import ProductForm from '../components/ProductForm';
-import ProtectedRoute from '../components/ProtectedRoute';
 
-function ProductEditPageContent() {
+export default function ProductEditPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -27,6 +26,7 @@ function ProductEditPageContent() {
       setUser(userData);
     } catch (error) {
       console.error('Ошибка загрузки пользователя:', error);
+      navigate('/login');
     }
   };
 
@@ -47,14 +47,14 @@ function ProductEditPageContent() {
     try {
       if (isEditing) {
         await api.updateProduct(id, productData);
-        alert('Товар успешно обновлён!');
+        alert('✅ Товар обновлён!');
       } else {
         await api.createProduct(productData);
-        alert('Товар успешно создан!');
+        alert('✅ Товар создан!');
       }
       navigate('/');
     } catch (error) {
-      alert('Ошибка сохранения: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
+      alert('❌ Ошибка: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
     }
   };
 
@@ -85,13 +85,5 @@ function ProductEditPageContent() {
         </div>
       </main>
     </div>
-  );
-}
-
-export default function ProductEditPage() {
-  return (
-    <ProtectedRoute>
-      <ProductEditPageContent />
-    </ProtectedRoute>
   );
 }

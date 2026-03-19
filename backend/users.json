@@ -1,40 +1,32 @@
 [
   {
-    "id": "UIJS5HZ1",
-    "email": "ivan@omlco.ru",
-    "first_name": "Иван",
-    "last_name": "Петров",
-    "password": "$2b$10$aRQ16hN9A06ZMH9i5w6yKuEbjTUNTMNoqfyE/F4zNGzEfLuftzwoK",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVSUpTNUhaMSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzczMDg3NDA1LCJleHAiOjE3NzM2OTIyMDV9.6HX7V1nXP41vjJdDqzyt-6zubEGeSN9z3iT7IOjBcK0"
+    "id": "admin123",
+    "email": "admin@omlco.ru",
+    "first_name": "Главный",
+    "last_name": "Администратор",
+    "password": "$2b$10$ZMApldfyeXEf6Mg7MSoIu..YWr945vOsGriZz0GBqq7h1qZwZrCQy",
+    "role": "admin",
+    "isActive": true,
+    "createdAt": "2026-03-19T18:33:01.255Z"
   },
   {
-    "id": "Co4BiZhE",
-    "email": "test@omlco.ru",
-    "first_name": "Тест",
-    "last_name": "Тестовый",
-    "password": "$2b$10$vI79uTeYPasM04I3ANA6W.9x6oSohXxSzTMVf5b1svkYD9bcTrxDK"
+    "id": "seller456",
+    "email": "seller@omlco.ru",
+    "first_name": "Торговый",
+    "last_name": "Продавец",
+    "password": "$2b$10$2aNeCD8nXn51jybZw6xPbeCJBEOUOSwyhfTZwayi8yhvyaq5YM4sW",
+    "role": "seller",
+    "isActive": true,
+    "createdAt": "2026-03-19T18:33:01.258Z"
   },
   {
-    "id": "BjWvwaKr",
-    "email": "ivan@oml44co.ru",
-    "first_name": "Иван",
-    "last_name": "Петров45",
-    "password": "$2b$10$hM5.eCGhrQW3XDwG1tN6auZN48SuN5FsOHkUjGqNX82ayBW9Av.s2"
-  },
-  {
-    "id": "fKrNBs2p",
-    "email": "ivan@oml44434co.ru",
-    "first_name": "Иван",
-    "last_name": "Петров45",
-    "password": "$2b$10$mLxB4wmLndoODGrT.Yq1RuyEVvAPQyW19VZNErgwYyYEdVoCJNvkC"
-  },
-  {
-    "id": "060jV4UA",
-    "email": "elena@yandex.ru",
-    "first_name": "Елена",
-    "last_name": "Анфилова",
-    "password": "$2b$10$n69dazwmKGGMsRNRMRcmNeCBa6BHosyjHEGj7DtkQa0bpLrgfmUMC",
-    "createdAt": "2026-03-10T06:36:49.618Z",
-    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNjBqVjRVQSIsInR5cGUiOiJyZWZyZXNoIiwiaWF0IjoxNzczOTI3MDU4LCJleHAiOjE3NzQ1MzE4NTh9.NCj9F7H9I7R37lptfYVZNjCP4EhJWoBNEi4nA5YTipQ"
+    "id": "user789",
+    "email": "user@omlco.ru",
+    "first_name": "Обычный",
+    "last_name": "Пользователь",
+    "password": "$2b$10$c99DeSXjTCeW5PK4XwTLS.QReQyF/2fulIYKTxoKb80u9IEcU42Sy",
+    "role": "user",
+    "isActive": true,
+    "createdAt": "2026-03-19T18:33:01.258Z"
   }
 ]

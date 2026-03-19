@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
-import ProductList from '../components/ProductList';
 import Header from '../components/Header';
+import ProductList from '../components/ProductList';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
@@ -43,8 +43,9 @@ export default function ProductsPage() {
     try {
       await api.deleteProduct(id);
       setProducts(prev => prev.filter(p => p.id !== id));
+      alert('✅ Товар удалён');
     } catch (error) {
-      alert('Ошибка удаления: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
+      alert('❌ Ошибка удаления: ' + (error.response?.data?.error || 'Неизвестная ошибка'));
     }
   };
 
@@ -56,7 +57,7 @@ export default function ProductsPage() {
         <div className="container">
           <div className="toolbar">
             <h1 className="page-title">🧙‍♂️ Лавка OML&CO</h1>
-            {user && (
+            {user && (user.role === 'seller' || user.role === 'admin') && (
               <Link to="/product/new" className="btn btn-primary">
                 ➕ Добавить товар
               </Link>
@@ -72,7 +73,7 @@ export default function ProductsPage() {
             <ProductList
               products={products}
               onDelete={handleDelete}
-              isAuthenticated={!!user}
+              userRole={user?.role}
             />
           )}
         </div>

@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/api';
 
-// Создаём экземпляр axios с базовыми настройками
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -10,8 +9,7 @@ const apiClient = axios.create({
   },
 });
 
-// ========== ПЕРЕХВАТЧИК ЗАПРОСОВ ==========
-// Автоматически добавляет accessToken в заголовок Authorization
+// Перехватчик запросов - добавляем токен
 apiClient.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem('accessToken');
@@ -23,8 +21,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ========== ПЕРЕХВАТЧИК ОТВЕТОВ ==========
-// Автоматически обновляет токен при 401 ошибке
+// Перехватчик ответов - обрабатываем 401 и обновляем токен
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -44,12 +41,16 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Если ошибка не 401 или запрос уже повторялся
+    // Если ошибка не 403 (доступ запрещён) или уже повторяли
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
 
-    // Если уже обновляем токен, ставим запрос в очередь
+    // Если 403 - пробрасываем для обработки в UI
+    if (error.response?.status === 403) {
+      return Promise.reject(error);
+    }
+
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
@@ -67,7 +68,6 @@ apiClient.interceptors.response.use(
     const refreshToken = localStorage.getItem('refreshToken');
 
     if (!refreshToken) {
-      // Нет refresh-токена — выходим
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       window.location.href = '/login';
@@ -75,27 +75,21 @@ apiClient.interceptors.response.use(
     }
 
     try {
-      // Пытаемся обновить токены
       const response = await axios.post(`${API_URL}/auth/refresh`, {
         refreshToken
       });
 
       const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-      // Сохраняем новые токены
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', newRefreshToken);
 
-      // Обновляем заголовок в исходном запросе
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
-      // Обрабатываем очередь ожидающих запросов
       processQueue(null, accessToken);
 
-      // Повторяем исходный запрос
       return apiClient(originalRequest);
     } catch (refreshError) {
-      // Ошибка обновления — чистим токены и выходим
       processQueue(refreshError, null);
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
@@ -107,7 +101,6 @@ apiClient.interceptors.response.use(
   }
 );
 
-// ========== API ФУНКЦИИ ==========
 export const api = {
   // Аутентификация
   register: async (userData) => {
@@ -118,11 +111,8 @@ export const api = {
   login: async (credentials) => {
     const response = await apiClient.post('/auth/login', credentials);
     const { accessToken, refreshToken, user } = response.data;
-    
-    // Сохраняем токены
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
-    
     return { user };
   },
 
@@ -160,6 +150,27 @@ export const api = {
 
   deleteProduct: async (id) => {
     const response = await apiClient.delete(`/products/${id}`);
+    return response.data;
+  },
+
+  // Пользователи (только для админа)
+  getUsers: async () => {
+    const response = await apiClient.get('/users');
+    return response.data;
+  },
+
+  getUserById: async (id) => {
+    const response = await apiClient.get(`/users/${id}`);
+    return response.data;
+  },
+
+  updateUser: async (id, userData) => {
+    const response = await apiClient.put(`/users/${id}`, userData);
+    return response.data;
+  },
+
+  deleteUser: async (id) => {
+    const response = await apiClient.delete(`/users/${id}`);
     return response.data;
   }
 };

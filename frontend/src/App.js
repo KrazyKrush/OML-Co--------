@@ -8,6 +8,26 @@ import RegisterPage from './pages/RegisterPage';
 import ProductsPage from './pages/ProductsPage';
 import ProductPage from './pages/ProductPage';
 import ProductEditPage from './pages/ProductEditPage';
+import UsersPage from './pages/UsersPage';
+
+// Компонент для защиты маршрутов по ролям
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const accessToken = localStorage.getItem('accessToken');
+  const userStr = localStorage.getItem('user');
+  
+  if (!accessToken) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles) {
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user || !allowedRoles.includes(user.role)) {
+      return <Navigate to="/" replace />;
+    }
+  }
+
+  return children;
+};
 
 function App() {
   return (
@@ -17,8 +37,35 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/" element={<ProductsPage />} />
         <Route path="/product/:id" element={<ProductPage />} />
-        <Route path="/product/new" element={<ProductEditPage />} />
-        <Route path="/product/edit/:id" element={<ProductEditPage />} />
+        
+        {/* Только для продавцов и админов */}
+        <Route 
+          path="/product/new" 
+          element={
+            <ProtectedRoute allowedRoles={['seller', 'admin']}>
+              <ProductEditPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/product/edit/:id" 
+          element={
+            <ProtectedRoute allowedRoles={['seller', 'admin']}>
+              <ProductEditPage />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Только для админов */}
+        <Route 
+          path="/users" 
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <UsersPage />
+            </ProtectedRoute>
+          } 
+        />
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
