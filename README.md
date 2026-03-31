@@ -1,6 +1,6 @@
 # 🧙‍♂️ OML&CO - Лавка колдовских вещей
 
-![OML&CO Logo](https://via.placeholder.com/300x100?text=OML%26CO+🧙)
+![OML&CO Logo](https://avatars.mds.yandex.net/i?id=373ea4d4ea894939ab131788f4261194_l-6323775-images-thumbs&n=13)
 
 **OML&CO** — это полноценное веб-приложение интернет-магазина, специализирующегося на продаже шуточных колдовских товаров. Проект состоит из двух частей: бэкенд на Node.js/Express и фронтенд на React.
 
